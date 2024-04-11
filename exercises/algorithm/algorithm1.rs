@@ -35,7 +35,7 @@ impl<T> Default for LinkedList<T> {
     }
 }
 
-impl<T> LinkedList<T> {
+impl<T: PartialOrd> LinkedList<T> {
     pub fn new() -> Self {
         Self {
             length: 0,
@@ -71,12 +71,37 @@ impl<T> LinkedList<T> {
     }
 	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
 	{
-		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
+		let mut merged_list = LinkedList::new();
+        let (mut curr_a, mut curr_b) = (list_a.start, list_b.start);
+
+        while let (Some(ptr_a), Some(ptr_b)) = (curr_a, curr_b) {
+            let val_a = unsafe { ptr_a.as_ref().val };
+            let val_b = unsafe { ptr_b.as_ref().val };
+
+            if val_a <= val_b {
+                merged_list.add(val_a);
+                curr_a = unsafe { ptr_a.as_ref().next };
+            } else {
+                merged_list.add(val_b);
+                curr_b = unsafe { ptr_b.as_ref().next };
+            }
         }
+
+        // Append remaining nodes from list_a
+        while let Some(ptr_a) = curr_a {
+            let val_a = unsafe { ptr_a.as_ref().val };
+            merged_list.add(val_a);
+            curr_a = unsafe { ptr_a.as_ref().next };
+        }
+
+        // Append remaining nodes from list_b
+        while let Some(ptr_b) = curr_b {
+            let val_b = unsafe { ptr_b.as_ref().val };
+            merged_list.add(val_b);
+            curr_b = unsafe { ptr_b.as_ref().next };
+        }
+
+        merged_list
 	}
 }
 
